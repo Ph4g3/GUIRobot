@@ -1,7 +1,7 @@
 #=========================
 #
 #Version: 0.3
-#Author:  Martin Moore
+#Author:  Martin Moore 
 #
 #=========================
 

@@ -3,20 +3,21 @@ import time
 from ctypes import *
 from ctypes.wintypes import *
 
-#(ulong) Pointer to extra info given by SendInput
-#Read with:
-#  ctypes.windll.user32.GetMessageExtraInfo()
-#Used by:
-#  KeyBdInput
-#  MouseInput
-
-#Make this into a class.
-#Pointers can be stored in lists and called with __call__()
-
+#Global c_ulong pointer object used with
+#dwExtraInfo in certain structs. Might be a
+#better idea to convert this into a class,
+#but it works well as it is.
 PUL = POINTER(c_ulong)
 
-
 class KeyBdInput(Structure):
+    """Creates a keyboard input structure. wVk is the virtual
+       keycode which correspond to physical keys. wScan, dwFlags
+       and time may be left at 0. dwExtraInfo is a pointer to a
+       ulong data type holding extra information on our action.
+       Info on virtual key codes can be found at
+       ttp://msdn.microsoft.com/en-us/library/ms927178.aspx
+       """
+       
     _fields_ = [("wVk", c_ushort),
              ("wScan", c_ushort),
              ("dwFlags", c_ulong),
@@ -24,11 +25,23 @@ class KeyBdInput(Structure):
              ("dwExtraInfo", PUL)]
 
 class HardwareInput(Structure):
+    """HardwareInput is unused in this module, but is
+       provided for completeness (for the Input Interface)."""
+       
     _fields_ = [("uMsg", c_ulong),
              ("wParamL", c_short),
              ("wParamH", c_ushort)]
 
 class MouseInput(Structure):
+    """Creates a mouse input structure. dx and dy are mouse
+       coordinates. They can be left at 0, as can mouseData
+       and time. dwExtraInfo is a pointer to a ulong data type
+       holding extra information on our action.
+       dwFlags is the click value of the virtual mouse. Info
+       can be found at 
+       http://msdn.microsoft.com/en-us/library/ms927178.aspx
+       """
+
     _fields_ = [("dx", c_long),
              ("dy", c_long),
              ("mouseData", c_ulong),
@@ -37,20 +50,39 @@ class MouseInput(Structure):
              ("dwExtraInfo", PUL)]
 
 class Input_I(Union):
+    """Input interface, takes one the following
+       structs: KeyBdInput, MouseInput, HardwareInput."""
+       
     _fields_ = [("ki", KeyBdInput),
               ("mi", MouseInput),
               ("hi", HardwareInput)]
 
 class Input(Structure):
+    """Input is the final struct we use before passing
+       the information off to the OS. The type field takes
+       a 0 or 1 for mouse or keyboard respectively. """
+       
     _fields_ = [("type", c_ulong),
              ("ii", Input_I)]
     
 class KeyBdState(Structure):
+    """This is a C type 256-byte array used for storing
+       the current state of our virtual keyboard. With the
+       exception of toggle keys (CAPS LOCK, SCROLL LOCK, etc),
+       many keys will be in the '0' state. """
+       
     _fields_ = [("array", c_byte * 256)]
 
 class VKeyboard():
-    
+    """Our Virtual Keyboard! Takes type speed as its
+       only (optional) argument. Default is 0.3 seconds."""
+       
     def __init__(self, typeSpeed = 0.3):
+        """Init of our VKeyboard sets up an ulong for
+           extra information provided by the operating system,
+           an Input Interface object and the virtual key code
+           table."""
+
         self.extra = c_ulong(0)
         self.click = Input_I()
         self.typeSpeed = typeSpeed
@@ -182,40 +214,54 @@ class VKeyboard():
                            'PREV_TRACK': 0xB1,
                            'STOP_TRACK': 0xB2,
                            'PLAY_PAUSE': 0xB3,
-                           'MAIL': 0xB4,
-                           
+                           'MAIL': 0xB4,   
                         }
                            
                            
     
     def _type(self, key):
+        """[Private] Takes a virtual key code and sends it to
+           the operating system. """
+           
         self.click.ki = KeyBdInput(key, 0, 0, 0, pointer(self.extra))
         x = Input(1, self.click)
         windll.user32.SendInput(1, pointer(x), sizeof(x))
         time.sleep(self.typeSpeed)
         
     def _getKeyboardState(self):
-        
-        #Need to translate this into keys
+        """[Private] Returns the state of our virtual keyboard in
+           a 256-byte C array."""
         
         k = KeyBdState()
         windll.user32.GetKeyboardState(pointer(k))
-        for x in k.array:
-            print x
+        return k
 
     def translateKey(self, key):
+        """Translate a virtual key code into an actual 'keyboard
+           key'."""
+           
         if self.vKeyTable.has_key(key):
             return self.vKeyTable.get(key)
         else:
             raise ValueError
 
     def pressButton(self, button):
+        """Takes a physical key representation (e.g. 'ESCAPE', 'UP',
+           'DOWN', 'v', etc.) and translates it into a virtual key
+           code for use by the OS. """
+           
         try:
             self._type(self.translateKey(button))
         except ValueError:
             print("Cannot translate key: Value Error!")
 
 def moveCircle():
+    """Move the mouse in the largest circle possible for the
+       given screen resolution and continues in decreasing spiral
+       sizes of 1 pixel. Prints how many circles have been made,
+       and how many iterations of the spriral/circle have been made.
+       Just an example of mouse movement."""
+    
     m = VMouse()
     screenRes = windll.user32.GetSystemMetrics(0), \
                 windll.user32.GetSystemMetrics(1)
@@ -229,7 +275,7 @@ def moveCircle():
     maxRadius = radius   
     iters, spirals = 0, 0
 
-    import math, time
+    import math
 
     while True:
         for degree in range(360):
@@ -247,7 +293,6 @@ def moveCircle():
             print iters, " iterations made!"
 
 class VMouse():
-
     """
     Create a virtual mouse.
     Click speed is the amount of time between pressing down a
@@ -255,35 +300,39 @@ class VMouse():
     """
 
     def __init__(self, clickSpeed = 0.5):
+        """Init of our VMouse sets up an ulong for
+           extra information provided by the operating system,
+           an Input Interface object and a virtual click table."""
+        
         self.click = Input_I()
         self.extra = c_ulong(0)
         self.clickSpeed = clickSpeed
 
-        #Click table is shown as:
-        #buttonType: [clickValue, releaseValue]
+        #In general, we will want to click a button and
+        #release it in order to simulate a single click
         self.clickTable = { 'left': [0x02, 0x04],
                             'right': [0x08, 0x10],
                             'middle': [0x20, 0x40]
                           }
         
     def getCoord(self):
+        """Gets the current mouse coordinates from the OS.
+           Returns a POINT object."""
+           
         pt = POINT()
         windll.user32.GetCursorPos(byref(pt))
         return pt
 
     def setCoord(self, xCoord, yCoord):
+        """Pass coordinates to the OS to set the mouse at
+           the desired coordinates."""
+           
         windll.user32.SetCursorPos(xCoord, yCoord)
 
     def _click(self, clickValues):
-        
-        # Possible Click Values
-        # =====================
-        # Left Click:     0x02
-        # Left Release:   0x04
-        # Right Click:    0x08
-        # Right Release:  0x10
-        # Middle Click:   0x20
-        # Middle Release: 0x40
+        """[Private] Send a virtual key code representing a click
+           to the operating system, followed by {clickSpeed} seconds
+           sleep, followed by a click release."""
 
         i = 0
         for values in clickValues:
@@ -306,6 +355,9 @@ class VMouse():
         self._click(clickValues)
 
     def translateClick(self, buttonToClick):
+        """Translate our click type to virtual key codes representing
+           a click and release tuple."""
+           
         if self.clickTable.has_key(buttonToClick):
             return self.clickTable.get(buttonToClick)
         else:
@@ -373,14 +425,7 @@ def demo():
             m.setCoord(506, 434)
             m.leftClick()
     del k, m
-
-
-k = VKeyboard()
-k._getKeyboardState()
-m = VMouse()
-pt = m.setCoord(480, 411)
-m.leftClick()
-#k.pressButtons('ALT', 'LCTRL', 'DELETE')
-#k.pressButton('LCTRL')
-#k.pressButton('ALT')
-#k.pressButton(4)
+    
+if __name__ == '__main__':
+    m = VMouse()
+    k = VKeyboard()

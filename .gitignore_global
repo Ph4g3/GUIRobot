@@ -1,0 +1,24 @@
+# Recommended exclusions by github #
+####################################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+*.log
+*.sql
+*.sqlite
+
+*.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# My exclusion files #
+# Python w/ eclipse  #
+######################
+.project
+.pydevproject
+*.pyc

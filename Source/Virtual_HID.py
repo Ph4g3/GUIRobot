@@ -1,7 +1,16 @@
+#=========================
+#
+#Version: 0.3
+#Author:  Martin Moore
+#
+#=========================
+
 import time
 
-from ctypes import *
-from ctypes.wintypes import *
+import ctypes
+from ctypes.wintypes import (c_long, c_short, c_byte, c_ulong, c_ushort, 
+                             POINT, POINTER, Structure, Union)
+                   
 
 #Global c_ulong pointer object used with
 #dwExtraInfo in certain structs. Might be a
@@ -10,7 +19,7 @@ from ctypes.wintypes import *
 PUL = POINTER(c_ulong)
 
 class KeyBdInput(Structure):
-    """Creates a keyboard input structure. wVk is the virtual
+    """Creates a keyboard input_I structure. wVk is the virtual
        keycode which correspond to physical keys. wScan, dwFlags
        and time may be left at 0. dwExtraInfo is a pointer to a
        ulong data type holding extra information on our action.
@@ -33,7 +42,7 @@ class HardwareInput(Structure):
              ("wParamH", c_ushort)]
 
 class MouseInput(Structure):
-    """Creates a mouse input structure. dx and dy are mouse
+    """Creates a mouse input_I structure. dx and dy are mouse
        coordinates. They can be left at 0, as can mouseData
        and time. dwExtraInfo is a pointer to a ulong data type
        holding extra information on our action.
@@ -44,7 +53,7 @@ class MouseInput(Structure):
 
     _fields_ = [("dx", c_long),
              ("dy", c_long),
-             ("mouseData", c_ulong),
+             ("dwData", c_ulong),
              ("dwFlags", c_ulong),
              ("time",c_ulong),
              ("dwExtraInfo", PUL)]
@@ -223,9 +232,9 @@ class VKeyboard():
         """[Private] Takes a virtual key code and sends it to
            the operating system. """
            
-        self.click.ki = KeyBdInput(key, 0, 0, 0, pointer(self.extra))
+        self.click.ki = KeyBdInput(key, 0, 0, 0, ctypes.pointer(self.extra))
         x = Input(1, self.click)
-        windll.user32.SendInput(1, pointer(x), sizeof(x))
+        ctypes.windll.user32.SendInput(1, ctypes.pointer(x), sizeof(x))
         time.sleep(self.typeSpeed)
         
     def _getKeyboardState(self):
@@ -233,7 +242,7 @@ class VKeyboard():
            a 256-byte C array."""
         
         k = KeyBdState()
-        windll.user32.GetKeyboardState(pointer(k))
+        ctypes.windll.user32.GetKeyboardState(ctypes.pointer(k))
         return k
 
     def translateKey(self, key):
@@ -255,6 +264,119 @@ class VKeyboard():
         except ValueError:
             print("Cannot translate key: Value Error!")
 
+class VMouse():
+    """
+    Create a virtual mouse.
+    Click speed is the amount of time between pressing down a
+    mouse button and releasing it. Default is 0.5 seconds.
+    """
+
+    def __init__(self, clickSpeed = 0.5):
+        """Init of our VMouse sets up an ulong for
+           extra information provided by the operating system,
+           an Input Interface object and a virtual click table."""
+        
+        self.input_I = Input_I()
+        self.extra = c_ulong(0)
+        self.clickSpeed = clickSpeed
+        #Constant for moving mouse wheel. One 'click' forward
+        #is equal to 120
+        self.wheelDelta = 120
+
+        #In general, we will want to click a button and
+        #release it in order to simulate a single click
+        self.clickTable = { 'left': [0x02, 0x04],
+                            'right': [0x08, 0x10],
+                            'middle': [0x20, 0x40],
+                            'wheel': [0x800],
+                            'hold_left': [0x02],
+                            'release_left': [0x04],
+                            'hold_right': [0x08],
+                            'release_right': [0x10],
+                            'hold_middle': [0x20],
+                            'release_middle': [0x40]
+                          }
+        
+    def getCoord(self):
+        """Gets the current mouse coordinates from the OS.
+           Returns a POINT object."""
+           
+        pt = POINT()
+        ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+        return pt
+
+    def setCoord(self, xCoord, yCoord):
+        """Pass coordinates to the OS to set the mouse at
+           the desired coordinates."""
+           
+        ctypes.windll.user32.SetCursorPos(xCoord, yCoord)
+
+    def _click(self, clickType, dwData = 0):
+        """[Internal] Send a virtual key code representing a click
+           to the operating system, followed by {clickSpeed} seconds
+           sleep, followed by a click release."""
+           
+        clickValues = self._translateClick(clickType)
+
+        for value in clickValues:
+            self.input_I.mi = MouseInput(0, 0, dwData, value, 0,
+                                         ctypes.pointer(self.extra))
+            x = Input(0, self.input_I)
+            ctypes.windll.user32.SendInput(1, ctypes.pointer(x),
+                                           ctypes.sizeof(x))
+            time.sleep(self.clickSpeed)
+            
+    def _translateClick(self, buttonToClick):
+        """[Internal] Translate our click type to virtual key codes 
+           representing a click and release tuple."""
+           
+        if self.clickTable.has_key(buttonToClick):
+            return self.clickTable.get(buttonToClick)
+        else:
+            raise ValueError
+
+    def leftClick(self):
+        self._click('left')
+
+    def rightClick(self):
+        self._click('right')
+
+    def middleClick(self):
+        self._click('middle')
+        
+    def holdLeft(self):
+        self._click('hold_left')
+        
+    def holdRight(self):
+        self._click('hold_right')
+        
+    def holdMiddle(self):
+        self._click('hold_middle')
+        
+    def releaseLeft(self):
+        self._click('release_left')
+        
+    def releaseRight(self):
+        self._click('release_right')
+        
+    def releaseMiddle(self):
+        self._click('release_middle')
+
+    def _mouseWheel(self, amt):
+        """[Internal] Send <amt> 'clicks' to the OS to simulate
+           movement of the mouse wheel."""
+           
+        #Unsure of how to test this - GUI movement is a large part
+        #of the project, so I better figure it out.
+
+        self._click('wheel', amt*self.wheelDelta)
+
+    def mouseWheelUp(self, amount):
+        self._mouseWheel(amount)
+        
+    def mouseWheelDown(self, amount):
+        self._mouseWheel(-amount)
+    
 def moveCircle():
     """Move the mouse in the largest circle possible for the
        given screen resolution and continues in decreasing spiral
@@ -291,141 +413,3 @@ def moveCircle():
         iters += 1
         if not iters % 100:
             print iters, " iterations made!"
-
-class VMouse():
-    """
-    Create a virtual mouse.
-    Click speed is the amount of time between pressing down a
-    mouse button and releasing it. Default is 0.5 seconds.
-    """
-
-    def __init__(self, clickSpeed = 0.5):
-        """Init of our VMouse sets up an ulong for
-           extra information provided by the operating system,
-           an Input Interface object and a virtual click table."""
-        
-        self.click = Input_I()
-        self.extra = c_ulong(0)
-        self.clickSpeed = clickSpeed
-
-        #In general, we will want to click a button and
-        #release it in order to simulate a single click
-        self.clickTable = { 'left': [0x02, 0x04],
-                            'right': [0x08, 0x10],
-                            'middle': [0x20, 0x40]
-                          }
-        
-    def getCoord(self):
-        """Gets the current mouse coordinates from the OS.
-           Returns a POINT object."""
-           
-        pt = POINT()
-        windll.user32.GetCursorPos(byref(pt))
-        return pt
-
-    def setCoord(self, xCoord, yCoord):
-        """Pass coordinates to the OS to set the mouse at
-           the desired coordinates."""
-           
-        windll.user32.SetCursorPos(xCoord, yCoord)
-
-    def _click(self, clickValues):
-        """[Private] Send a virtual key code representing a click
-           to the operating system, followed by {clickSpeed} seconds
-           sleep, followed by a click release."""
-
-        i = 0
-        for values in clickValues:
-            self.click.mi = MouseInput(0, 0, 0, clickValues[i], 0, pointer(self.extra))
-            x = Input(0, self.click)
-            windll.user32.SendInput(1, pointer(x), sizeof(x))
-            time.sleep(self.clickSpeed)
-            i += 1
-
-    def leftClick(self):
-        clickValues = self.translateClick('left')
-        self._click(clickValues)
-
-    def rightClick(self):
-        clickValues = self.translateClick('right')
-        self._click(clickValues)
-
-    def middleClick(self):
-        clickValues = self.translateClick('middle')
-        self._click(clickValues)
-
-    def translateClick(self, buttonToClick):
-        """Translate our click type to virtual key codes representing
-           a click and release tuple."""
-           
-        if self.clickTable.has_key(buttonToClick):
-            return self.clickTable.get(buttonToClick)
-        else:
-            raise ValueError
-
-    def _mouseWheel(self):
-        pass
-
-    def mouseWheelUp(self, amt):
-        pass
-
-    def mouseWheelDown(self, amt):
-        pass
-
-def demo():
-
-    """Quick demo to open notepad and type some input."""
-
-    import time
-
-    #Initialize our Virtual HIDs
-    k = VKeyboard(typeSpeed=0.01)
-    m = VMouse()
-
-    #Start Menu button coords
-    xCoord, yCoord = 16, 726
-    applications = ['notepad', 'scite']
-
-    for app in applications:
-        #Click start menu
-        m.setCoord(xCoord, yCoord)
-        m.leftClick()
-
-        #Type our application name and press enter
-        for letter in app:
-            if letter.isalpha():
-                k.pressButton(letter.upper())
-            else:
-                k.pressButton(letter)
-
-        time.sleep(1.0)
-        k.pressButton('ENTER')
-
-        time.sleep(3.0)
-
-        #Say the magic words
-        message = "Automating user input"
-        for letter in message:
-            if letter.isalpha():
-                k.pressButton(letter.upper())
-            else:
-                k.pressButton(letter)
-
-        time.sleep(3)
-
-        if app is 'notepad':
-            m.setCoord(995, 46)
-            m.leftClick()
-            m.setCoord(545, 362)
-            m.leftClick()
-            
-        if app is 'scite':
-            m.setCoord(542, 6)
-            m.leftClick()
-            m.setCoord(506, 434)
-            m.leftClick()
-    del k, m
-    
-if __name__ == '__main__':
-    m = VMouse()
-    k = VKeyboard()

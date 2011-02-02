@@ -1,51 +1,24 @@
+#=========================
+#
+#Version: 0.3
+#Author:  Martin Moore
+#
+#=========================
+
 import ctypes
 import ctypes.wintypes
 import unittest
-import threading
 
 import os
 import sys
 
 import time
 
+#Dev workspace source import 
 directory = 'C:/Users/Ph4g3/workspace/GUIRobot/'
-
 if os.path.isdir(directory):
     sys.path.append(directory)
     from Source.Virtual_HID import *
-    
-#class KeyStateListener(threading.Thread):
-#    """A class used to listen for button presses."""
-#    
-#    def __init__(self, vKeyCode, timeToListen):
-#        threading.Thread.__init__(self)
-#        self.vKeyCode = vKeyCode
-#        self.timeToListen = timeToListen
-#        self.keyState = False
-#    
-#    def run(self):
-#        startTime = time.time()
-#        while time.time() < startTime + self.timeToListen:
-#            if self.checkState():
-#                self.setKeyState(True)
-#                break
-#            
-#    def checkState(self):
-#        """State is in binary form. High order bit shows whether key
-#           is up or down (0 or 1 respectively). Low order bit shows
-#           whether key is toggled on or off (0 or 1 respectively)."""
-#           
-#        state = bin(ctypes.windll.user32.GetKeyState(self.vKeyCode))
-#        state = state.split('b')[1]
-#        if state[0] == '1':
-#            return True
-#        return False
-#    
-#    def getKeyState(self):
-#        return self.keyState
-#    
-#    def setKeyState(self, state):
-#        self.keyState = state
         
         
 class test_VMouse(unittest.TestCase):
@@ -74,32 +47,56 @@ class test_VMouse(unittest.TestCase):
         self.assertEquals(100, self.pt.x)
         self.assertEquals(100, self.pt.y)
         
+        #Test for high/low edge cases for coordinates
+        #i.e. greater than largest coordinate available.
+        
+        #NOTE: Maximum coords in windows is one less than resolution
+        #e.g. max coords for 1920x1080 resolution is [1919, 1079]
+        #Most likely to keep 1px of mouse cursor on screen
+        resolution = ctypes.windll.user32.GetSystemMetrics(0), \
+                     ctypes.windll.user32.GetSystemMetrics(1)
+        self.mouse.setCoord(1000000, 1000000)
+        ctypes.windll.user32.GetCursorPos(ctypes.byref(self.pt))
+        self.assertEquals(resolution[0] - 1, self.pt.x)
+        self.assertEquals(resolution[1] - 1, self.pt.y)
+        
+        #Illegal coordinates should default to 0, 0
+        self.mouse.setCoord(-10, -10)
+        ctypes.windll.user32.GetCursorPos(ctypes.byref(self.pt))
+        self.assertEquals(0, self.pt.x)
+        self.assertEquals(0, self.pt.y)        
+        
     def test_click(self):
-        self.mouse.setCoord(455, 455)
+        self.mouse.setCoord(500, 500)
         time.sleep(0.5)
         
         #Virtual key codes to check state of
         #a given key. Note: Different codes used for
-        #clicking/releasing keys.
-        vKeyCodes = [0x01, 0x02, 0x04]
-        clickValues = [0x02, 0x08, 0x20]
-        releaseValues = [0x04, 0x10, 0x40]
+        #clicking/releasing keys. Damn MS.
+        vKeyCodes = [0x01, 0x02, 0x08]
+        clickValues = ['hold_left', 'hold_right', 'hold_middle']
+        releaseValues = ['release_left', 'release_right', 'release_middle']
         
-        i = 0
-        for clickValue in clickValues:
-            try:
-                self.mouse._click([clickValue])
-            finally:
+        try:
+            i = 0
+            for value in clickValues:
+                self.mouse._click(value)
                 self.assertTrue(self.getKeyState(vKeyCodes[i]))
-                self.mouse._click([releaseValues[i]])
-            i += 1
+                self.mouse._click(releaseValues[i])
+                i += 1
+        finally:
+            #Release everything regardless of test results
+            for value in releaseValues:
+                self.mouse._click(value)
+            
             
     def getKeyState(self, vKeyCode):
         state = bin(ctypes.windll.user32.GetKeyState(vKeyCode))
         state = state.split('b')[1]
         if state[0] == '1':
             return True
-        return False
+        else:
+            return False
         
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(test_VMouse)

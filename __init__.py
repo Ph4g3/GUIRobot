@@ -13,6 +13,10 @@ directory = 'C:/Users/Ph4g3/workspace/GUIRobot/'
 
 if os.path.isdir(directory):
     sys.path.append(directory)
-    from Source import Virtual_HID
-    from Test import test_Virtual_HID
-    
+    try:
+        import Source
+        import Test
+    except ImportError:
+        print(sys.exc_info()[1])
+else:
+    print(directory+' is not a valid path.')

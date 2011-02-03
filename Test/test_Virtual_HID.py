@@ -5,20 +5,16 @@
 #                         #
 #=========================#
 
+#Standard Modules
 import ctypes
 import ctypes.wintypes
 import unittest
-
 import os
 import sys
 import time
 
-#Dev workspace source import 
-#directory = 'C:/Users/Ph4g3/workspace/GUIRobot/'
-#if os.path.isdir(directory):
-#    sys.path.append(directory)
-#    from Source.Virtual_HID import *
-        
+#Local modules
+import Source.Virtual_HID as Virtual_HID        
         
 class test_VMouse(unittest.TestCase):
     
@@ -83,6 +79,8 @@ class test_VMouse(unittest.TestCase):
                 self.assertTrue(self.getKeyState(vKeyCodes[i]))
                 self.mouse._click(releaseValues[i])
                 i += 1
+        except AssertionError:
+            print(sys.exc_info()[1])
         finally:
             #Release everything regardless of test results
             for value in releaseValues:
@@ -96,7 +94,7 @@ class test_VMouse(unittest.TestCase):
             return True
         else:
             return False
-        
+     
 def main():
     """Run tests."""
     suite = unittest.TestLoader().loadTestsFromTestCase(test_VMouse)

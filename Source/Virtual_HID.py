@@ -9,7 +9,7 @@ import time
 
 import ctypes
 from ctypes.wintypes import (c_long, c_short, c_byte, c_ulong, c_ushort, 
-                             POINT, POINTER, Structure, Union)
+                             POINT, POINTER, Structure, Union, sizeof)
                    
 
 #Global c_ulong pointer object used with
@@ -229,7 +229,16 @@ class VKeyboard():
                            'MAIL': 0xB4,   
                         }
                            
-                           
+    def __str__(self):
+        items = self.vKeyTable.iteritems()
+        values = self.vKeyTable.itervalues()
+        kState = self._getKeyboardState()
+        
+        i = 0
+        for iterations in range(len(self.vKeyTable)):
+            print('['+str(hex(values.next()))+']'+
+                  ' '+str(items.next()[0])+' : '+ str(kState.array[i]))
+            i+=1              
     
     def _type(self, key):
         """[Internal] Takes a virtual key code and sends it to
@@ -237,8 +246,9 @@ class VKeyboard():
            
         self.click.ki = KeyBdInput(key, 0, 0, 0, ctypes.pointer(self.extra))
         x = Input(1, self.click)
-        ctypes.windll.user32.SendInput(1, ctypes.pointer(x), sizeof(x))
+        ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
         time.sleep(self.typeSpeed)
+        self._setKeyboardState(self.initState)
         
     def _getKeyboardState(self):
         """[Internal] Returns the state of our virtual keyboard in

@@ -1,9 +1,9 @@
-#=========================
-#
-#Version: 0.3
-#Author:  Martin Moore 
-#
-#=========================
+#=========================#
+#                         #
+#     Version: 0.3        #
+#  Author:  Martin Moore  #
+#                         #
+#=========================#
 
 import time
 
@@ -92,6 +92,9 @@ class VKeyboard():
            an Input Interface object and the virtual key code
            table."""
 
+        #Get our initial state so we can revert toggle keys when
+        #we are done
+        self.initState = self._getKeyboardState()
         self.extra = c_ulong(0)
         self.click = Input_I()
         self.typeSpeed = typeSpeed
@@ -229,7 +232,7 @@ class VKeyboard():
                            
     
     def _type(self, key):
-        """[Private] Takes a virtual key code and sends it to
+        """[Internal] Takes a virtual key code and sends it to
            the operating system. """
            
         self.click.ki = KeyBdInput(key, 0, 0, 0, ctypes.pointer(self.extra))
@@ -238,12 +241,18 @@ class VKeyboard():
         time.sleep(self.typeSpeed)
         
     def _getKeyboardState(self):
-        """[Private] Returns the state of our virtual keyboard in
+        """[Internal] Returns the state of our virtual keyboard in
            a 256-byte C array."""
         
-        k = KeyBdState()
-        ctypes.windll.user32.GetKeyboardState(ctypes.pointer(k))
-        return k
+        kState = KeyBdState()
+        ctypes.windll.user32.GetKeyboardState(ctypes.pointer(kState))
+        return kState
+    
+    def _setKeyboardState(self, kState):
+        """[Internal] Set the state of our virtual keyboard from a
+           256-byte C array."""
+           
+        ctypes.windll.user32.SetKeyboardState(ctypes.pointer(kState))
 
     def translateKey(self, key):
         """Translate a virtual key code into an actual 'keyboard

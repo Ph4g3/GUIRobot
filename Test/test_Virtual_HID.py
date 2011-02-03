@@ -1,9 +1,9 @@
-#=========================
-#
-#Version: 0.3
-#Author:  Martin Moore
-#
-#=========================
+#=========================#
+#                         #
+#     Version: 0.3        #
+#  Author:  Martin Moore  #
+#                         #
+#=========================#
 
 import ctypes
 import ctypes.wintypes
@@ -11,14 +11,13 @@ import unittest
 
 import os
 import sys
-
 import time
 
 #Dev workspace source import 
-directory = 'C:/Users/Ph4g3/workspace/GUIRobot/'
-if os.path.isdir(directory):
-    sys.path.append(directory)
-    from Source.Virtual_HID import *
+#directory = 'C:/Users/Ph4g3/workspace/GUIRobot/'
+#if os.path.isdir(directory):
+#    sys.path.append(directory)
+#    from Source.Virtual_HID import *
         
         
 class test_VMouse(unittest.TestCase):
@@ -26,7 +25,7 @@ class test_VMouse(unittest.TestCase):
     def setUp(self):
         """Create a fast virtual mouse"""
         
-        self.mouse = VMouse(clickSpeed = 0)
+        self.mouse = Virtual_HID.VMouse(clickSpeed = 0)
         self.pt = ctypes.wintypes.POINT()
         
     def tearDown(self):
@@ -98,7 +97,10 @@ class test_VMouse(unittest.TestCase):
         else:
             return False
         
-if __name__ == '__main__':
+def main():
+    """Run tests."""
     suite = unittest.TestLoader().loadTestsFromTestCase(test_VMouse)
     unittest.TextTestRunner(verbosity=2).run(suite)
         
+if __name__ == '__main__':
+    main()    

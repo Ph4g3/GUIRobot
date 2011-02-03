@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>GUIRobot.Test.test_Virtual_HID</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="GUIRobot-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://github.com/Ph4g3/GUIRobot">GUIRobot</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="GUIRobot-module.html">Package&nbsp;GUIRobot</a> ::
+        <a href="GUIRobot.Test-module.html">Package&nbsp;Test</a> ::
+        Module&nbsp;test_Virtual_HID
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="GUIRobot.Test.test_Virtual_HID-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="GUIRobot.Test.test_Virtual_HID-module.html">Module GUIRobot.Test.test_Virtual_HID</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-comment">#=========================#</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"><tt class="py-comment">#                         #</tt> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-comment">#     Version: 0.3        #</tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-comment">#  Author:  Martin Moore  #</tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"><tt class="py-comment">#                         #</tt> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"><tt class="py-comment">#=========================#</tt> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"><tt class="py-comment">#Standard Modules</tt> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">ctypes</tt> </tt>
+<a name="L10"></a><tt class="py-lineno"> 10</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">ctypes</tt><tt class="py-op">.</tt><tt class="py-name">wintypes</tt> </tt>
+<a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">unittest</tt> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">os</tt> </tt>
+<a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">sys</tt> </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-0" class="py-name" targets="Variable GUIRobot.Source.Virtual_HID.KeyBdInput.time=GUIRobot.Source.Virtual_HID.KeyBdInput-class.html#time,Variable GUIRobot.Source.Virtual_HID.MouseInput.time=GUIRobot.Source.Virtual_HID.MouseInput-class.html#time"><a title="GUIRobot.Source.Virtual_HID.KeyBdInput.time
+GUIRobot.Source.Virtual_HID.MouseInput.time" class="py-name" href="#" onclick="return doclink('link-0', 'time', 'link-0');">time</a></tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line"> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line"><tt class="py-comment">#Local modules</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-1" class="py-name" targets="Package GUIRobot.Source=GUIRobot.Source-module.html"><a title="GUIRobot.Source" class="py-name" href="#" onclick="return doclink('link-1', 'Source', 'link-1');">Source</a></tt><tt class="py-op">.</tt><tt id="link-2" class="py-name" targets="Module GUIRobot.Source.Virtual_HID=GUIRobot.Source.Virtual_HID-module.html"><a title="GUIRobot.Source.Virtual_HID" class="py-name" href="#" onclick="return doclink('link-2', 'Virtual_HID', 'link-2');">Virtual_HID</a></tt> <tt class="py-keyword">as</tt> <tt id="link-3" class="py-name"><a title="GUIRobot.Source.Virtual_HID" class="py-name" href="#" onclick="return doclink('link-3', 'Virtual_HID', 'link-2');">Virtual_HID</a></tt>         </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line">         </tt>
+<a name="test_VMouse"></a><div id="test_VMouse-def"><a name="L19"></a><tt class="py-lineno"> 19</tt> <a class="py-toggle" href="#" id="test_VMouse-toggle" onclick="return toggle('test_VMouse');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="GUIRobot.Test.test_Virtual_HID.test_VMouse-class.html">test_VMouse</a><tt class="py-op">(</tt><tt class="py-base-class">unittest</tt><tt class="py-op">.</tt><tt class="py-base-class">TestCase</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="test_VMouse-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="test_VMouse-expanded"><a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line">     </tt>
+<a name="test_VMouse.setUp"></a><div id="test_VMouse.setUp-def"><a name="L21"></a><tt class="py-lineno"> 21</tt> <a class="py-toggle" href="#" id="test_VMouse.setUp-toggle" onclick="return toggle('test_VMouse.setUp');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="GUIRobot.Test.test_Virtual_HID.test_VMouse-class.html#setUp">setUp</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="test_VMouse.setUp-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="test_VMouse.setUp-expanded"><a name="L22"></a><tt class="py-lineno"> 22</tt>  <tt class="py-line">        <tt class="py-docstring">"""Create a fast virtual mouse"""</tt> </tt>
+<a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line">         </tt>
+<a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mouse</tt> <tt class="py-op">=</tt> <tt id="link-4" class="py-name"><a title="GUIRobot.Source.Virtual_HID" class="py-name" href="#" onclick="return doclink('link-4', 'Virtual_HID', 'link-2');">Virtual_HID</a></tt><tt class="py-op">.</tt><tt id="link-5" class="py-name" targets="Class GUIRobot.Source.Virtual_HID.VMouse=GUIRobot.Source.Virtual_HID.VMouse-class.html"><a title="GUIRobot.Source.Virtual_HID.VMouse" class="py-name" href="#" onclick="return doclink('link-5', 'VMouse', 'link-5');">VMouse</a></tt><tt class="py-op">(</tt><tt class="py-name">clickSpeed</tt> <tt class="py-op">=</tt> <tt class="py-number">0</tt><tt class="py-op">)</tt> </tt>
+<a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pt</tt> <tt class="py-op">=</tt> <tt class="py-name">ctypes</tt><tt class="py-op">.</tt><tt class="py-name">wintypes</tt><tt class="py-op">.</tt><tt class="py-name">POINT</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line">         </tt>
+<a name="test_VMouse.tearDown"></a><div id="test_VMouse.tearDown-def"><a name="L27"></a><tt class="py-lineno"> 27</tt> <a class="py-toggle" href="#" id="test_VMouse.tearDown-toggle" onclick="return toggle('test_VMouse.tearDown');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="GUIRobot.Test.test_Virtual_HID.test_VMouse-class.html#tearDown">tearDown</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="test_VMouse.tearDown-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="test_VMouse.tearDown-expanded"><a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line">        <tt class="py-docstring">"""Force python to clean up."""</tt> </tt>
+<a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line">         </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line">        <tt class="py-keyword">del</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mouse</tt> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line">        <tt class="py-keyword">del</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pt</tt> </tt>
+</div><a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line">         </tt>
+<a name="test_VMouse.test_getCoord"></a><div id="test_VMouse.test_getCoord-def"><a name="L33"></a><tt class="py-lineno"> 33</tt> <a class="py-toggle" href="#" id="test_VMouse.test_getCoord-toggle" onclick="return toggle('test_VMouse.test_getCoord');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="GUIRobot.Test.test_Virtual_HID.test_VMouse-class.html#test_getCoord">test_getCoord</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="test_VMouse.test_getCoord-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="test_VMouse.test_getCoord-expanded"><a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line">        <tt class="py-name">ctypes</tt><tt class="py-op">.</tt><tt class="py-name">windll</tt><tt class="py-op">.</tt><tt class="py-name">user32</tt><tt class="py-op">.</tt><tt class="py-name">SetCursorPos</tt><tt class="py-op">(</tt><tt class="py-number">100</tt><tt class="py-op">,</tt> <tt class="py-number">100</tt><tt class="py-op">)</tt> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pt</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mouse</tt><tt class="py-op">.</tt><tt id="link-6" class="py-name" targets="Method GUIRobot.Source.Virtual_HID.VMouse.getCoord()=GUIRobot.Source.Virtual_HID.VMouse-class.html#getCoord"><a title="GUIRobot.Source.Virtual_HID.VMouse.getCoord" class="py-name" href="#" onclick="return doclink('link-6', 'getCoord', 'link-6');">getCoord</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">assertEquals</tt><tt class="py-op">(</tt><tt class="py-number">100</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pt</tt><tt class="py-op">.</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">assertEquals</tt><tt class="py-op">(</tt><tt class="py-number">100</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pt</tt><tt class="py-op">.</tt><tt class="py-name">y</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line">         </tt>
+<a name="test_VMouse.test_setCoord"></a><div id="test_VMouse.test_setCoord-def"><a name="L39"></a><tt class="py-lineno"> 39</tt> <a class="py-toggle" href="#" id="test_VMouse.test_setCoord-toggle" onclick="return toggle('test_VMouse.test_setCoord');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="GUIRobot.Test.test_Virtual_HID.test_VMouse-class.html#test_setCoord">test_setCoord</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="test_VMouse.test_setCoord-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="test_VMouse.test_setCoord-expanded"><a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mouse</tt><tt class="py-op">.</tt><tt id="link-7" class="py-name" targets="Method GUIRobot.Source.Virtual_HID.VMouse.setCoord()=GUIRobot.Source.Virtual_HID.VMouse-class.html#setCoord"><a title="GUIRobot.Source.Virtual_HID.VMouse.setCoord" class="py-name" href="#" onclick="return doclink('link-7', 'setCoord', 'link-7');">setCoord</a></tt><tt class="py-op">(</tt><tt class="py-number">100</tt><tt class="py-op">,</tt> <tt class="py-number">100</tt><tt class="py-op">)</tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line">        <tt class="py-name">ctypes</tt><tt class="py-op">.</tt><tt class="py-name">windll</tt><tt class="py-op">.</tt><tt class="py-name">user32</tt><tt class="py-op">.</tt><tt class="py-name">GetCursorPos</tt><tt class="py-op">(</tt><tt class="py-name">ctypes</tt><tt class="py-op">.</tt><tt class="py-name">byref</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pt</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">assertEquals</tt><tt class="py-op">(</tt><tt class="py-number">100</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pt</tt><tt class="py-op">.</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">assertEquals</tt><tt class="py-op">(</tt><tt class="py-number">100</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pt</tt><tt class="py-op">.</tt><tt class="py-name">y</tt><tt class="py-op">)</tt> </tt>
+<a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line">         </tt>
+<a name="L45"></a><tt class="py-lineno"> 45</tt>  <tt class="py-line">        <tt class="py-comment">#Test for high/low edge cases for coordinates</tt> </tt>
+<a name="L46"></a><tt class="py-lineno"> 46</tt>  <tt class="py-line">        <tt class="py-comment">#i.e. greater than largest coordinate available.</tt> </tt>
+<a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line">         </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line">        <tt class="py-comment">#NOTE: Maximum coords in windows is one less than resolution</tt> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line">        <tt class="py-comment">#e.g. max coords for 1920x1080 resolution is [1919, 1079]</tt> </tt>
+<a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line">        <tt class="py-comment">#Most likely to keep 1px of mouse cursor on screen</tt> </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line">        <tt class="py-name">resolution</tt> <tt class="py-op">=</tt> <tt class="py-name">ctypes</tt><tt class="py-op">.</tt><tt class="py-name">windll</tt><tt class="py-op">.</tt><tt class="py-name">user32</tt><tt class="py-op">.</tt><tt class="py-name">GetSystemMetrics</tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> \ </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line">                     <tt class="py-name">ctypes</tt><tt class="py-op">.</tt><tt class="py-name">windll</tt><tt class="py-op">.</tt><tt class="py-name">user32</tt><tt class="py-op">.</tt><tt class="py-name">GetSystemMetrics</tt><tt class="py-op">(</tt><tt class="py-number">1</tt><tt class="py-op">)</tt> </tt>
+<a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mouse</tt><tt class="py-op">.</tt><tt id="link-8" class="py-name"><a title="GUIRobot.Source.Virtual_HID.VMouse.setCoord" class="py-name" href="#" onclick="return doclink('link-8', 'setCoord', 'link-7');">setCoord</a></tt><tt class="py-op">(</tt><tt class="py-number">1000000</tt><tt class="py-op">,</tt> <tt class="py-number">1000000</tt><tt class="py-op">)</tt> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line">        <tt class="py-name">ctypes</tt><tt class="py-op">.</tt><tt class="py-name">windll</tt><tt class="py-op">.</tt><tt class="py-name">user32</tt><tt class="py-op">.</tt><tt class="py-name">GetCursorPos</tt><tt class="py-op">(</tt><tt class="py-name">ctypes</tt><tt class="py-op">.</tt><tt class="py-name">byref</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pt</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L55"></a><tt class="py-lineno"> 55</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">assertEquals</tt><tt class="py-op">(</tt><tt class="py-name">resolution</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> <tt class="py-op">-</tt> <tt class="py-number">1</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pt</tt><tt class="py-op">.</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L56"></a><tt class="py-lineno"> 56</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">assertEquals</tt><tt class="py-op">(</tt><tt class="py-name">resolution</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt> <tt class="py-op">-</tt> <tt class="py-number">1</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pt</tt><tt class="py-op">.</tt><tt class="py-name">y</tt><tt class="py-op">)</tt> </tt>
+<a name="L57"></a><tt class="py-lineno"> 57</tt>  <tt class="py-line">         </tt>
+<a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line">        <tt class="py-comment">#Illegal coordinates should default to 0, 0</tt> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mouse</tt><tt class="py-op">.</tt><tt id="link-9" class="py-name"><a title="GUIRobot.Source.Virtual_HID.VMouse.setCoord" class="py-name" href="#" onclick="return doclink('link-9', 'setCoord', 'link-7');">setCoord</a></tt><tt class="py-op">(</tt><tt class="py-op">-</tt><tt class="py-number">10</tt><tt class="py-op">,</tt> <tt class="py-op">-</tt><tt class="py-number">10</tt><tt class="py-op">)</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line">        <tt class="py-name">ctypes</tt><tt class="py-op">.</tt><tt class="py-name">windll</tt><tt class="py-op">.</tt><tt class="py-name">user32</tt><tt class="py-op">.</tt><tt class="py-name">GetCursorPos</tt><tt class="py-op">(</tt><tt class="py-name">ctypes</tt><tt class="py-op">.</tt><tt class="py-name">byref</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pt</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">assertEquals</tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pt</tt><tt class="py-op">.</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">assertEquals</tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pt</tt><tt class="py-op">.</tt><tt class="py-name">y</tt><tt class="py-op">)</tt>         </tt>
+</div><a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line">         </tt>
+<a name="test_VMouse.test_click"></a><div id="test_VMouse.test_click-def"><a name="L64"></a><tt class="py-lineno"> 64</tt> <a class="py-toggle" href="#" id="test_VMouse.test_click-toggle" onclick="return toggle('test_VMouse.test_click');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="GUIRobot.Test.test_Virtual_HID.test_VMouse-class.html#test_click">test_click</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="test_VMouse.test_click-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="test_VMouse.test_click-expanded"><a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mouse</tt><tt class="py-op">.</tt><tt id="link-10" class="py-name"><a title="GUIRobot.Source.Virtual_HID.VMouse.setCoord" class="py-name" href="#" onclick="return doclink('link-10', 'setCoord', 'link-7');">setCoord</a></tt><tt class="py-op">(</tt><tt class="py-number">500</tt><tt class="py-op">,</tt> <tt class="py-number">500</tt><tt class="py-op">)</tt> </tt>
+<a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line">        <tt id="link-11" class="py-name"><a title="GUIRobot.Source.Virtual_HID.KeyBdInput.time
+GUIRobot.Source.Virtual_HID.MouseInput.time" class="py-name" href="#" onclick="return doclink('link-11', 'time', 'link-0');">time</a></tt><tt class="py-op">.</tt><tt class="py-name">sleep</tt><tt class="py-op">(</tt><tt class="py-number">0.5</tt><tt class="py-op">)</tt> </tt>
+<a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line">         </tt>
+<a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line">        <tt class="py-comment">#Virtual key codes to check state of</tt> </tt>
+<a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line">        <tt class="py-comment">#a given key. Note: Different codes used for</tt> </tt>
+<a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line">        <tt class="py-comment">#clicking/releasing keys. Damn MS.</tt> </tt>
+<a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line">        <tt class="py-name">vKeyCodes</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-number">0x01</tt><tt class="py-op">,</tt> <tt class="py-number">0x02</tt><tt class="py-op">,</tt> <tt class="py-number">0x08</tt><tt class="py-op">]</tt> </tt>
+<a name="L72"></a><tt class="py-lineno"> 72</tt>  <tt class="py-line">        <tt class="py-name">clickValues</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-string">'hold_left'</tt><tt class="py-op">,</tt> <tt class="py-string">'hold_right'</tt><tt class="py-op">,</tt> <tt class="py-string">'hold_middle'</tt><tt class="py-op">]</tt> </tt>
+<a name="L73"></a><tt class="py-lineno"> 73</tt>  <tt class="py-line">        <tt class="py-name">releaseValues</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-string">'release_left'</tt><tt class="py-op">,</tt> <tt class="py-string">'release_right'</tt><tt class="py-op">,</tt> <tt class="py-string">'release_middle'</tt><tt class="py-op">]</tt> </tt>
+<a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line">         </tt>
+<a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line">        <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line">            <tt class="py-name">i</tt> <tt class="py-op">=</tt> <tt class="py-number">0</tt> </tt>
+<a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line">            <tt class="py-keyword">for</tt> <tt class="py-name">value</tt> <tt class="py-keyword">in</tt> <tt class="py-name">clickValues</tt><tt class="py-op">:</tt> </tt>
+<a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mouse</tt><tt class="py-op">.</tt><tt id="link-12" class="py-name" targets="Method GUIRobot.Source.Virtual_HID.VMouse._click()=GUIRobot.Source.Virtual_HID.VMouse-class.html#_click"><a title="GUIRobot.Source.Virtual_HID.VMouse._click" class="py-name" href="#" onclick="return doclink('link-12', '_click', 'link-12');">_click</a></tt><tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">)</tt> </tt>
+<a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">assertTrue</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-13" class="py-name" targets="Method GUIRobot.Test.test_Virtual_HID.test_VMouse.getKeyState()=GUIRobot.Test.test_Virtual_HID.test_VMouse-class.html#getKeyState"><a title="GUIRobot.Test.test_Virtual_HID.test_VMouse.getKeyState" class="py-name" href="#" onclick="return doclink('link-13', 'getKeyState', 'link-13');">getKeyState</a></tt><tt class="py-op">(</tt><tt class="py-name">vKeyCodes</tt><tt class="py-op">[</tt><tt class="py-name">i</tt><tt class="py-op">]</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mouse</tt><tt class="py-op">.</tt><tt id="link-14" class="py-name"><a title="GUIRobot.Source.Virtual_HID.VMouse._click" class="py-name" href="#" onclick="return doclink('link-14', '_click', 'link-12');">_click</a></tt><tt class="py-op">(</tt><tt class="py-name">releaseValues</tt><tt class="py-op">[</tt><tt class="py-name">i</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
+<a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line">                <tt class="py-name">i</tt> <tt class="py-op">+=</tt> <tt class="py-number">1</tt> </tt>
+<a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line">        <tt class="py-keyword">except</tt> <tt id="link-15" class="py-name" targets="Class exceptions.AssertionError=exceptions.AssertionError-class.html"><a title="exceptions.AssertionError" class="py-name" href="#" onclick="return doclink('link-15', 'AssertionError', 'link-15');">AssertionError</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line">            <tt class="py-keyword">print</tt><tt class="py-op">(</tt><tt class="py-name">sys</tt><tt class="py-op">.</tt><tt class="py-name">exc_info</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
+<a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line">        <tt class="py-keyword">finally</tt><tt class="py-op">:</tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">            <tt class="py-comment">#Release everything regardless of test results</tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line">            <tt class="py-keyword">for</tt> <tt class="py-name">value</tt> <tt class="py-keyword">in</tt> <tt class="py-name">releaseValues</tt><tt class="py-op">:</tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mouse</tt><tt class="py-op">.</tt><tt id="link-16" class="py-name"><a title="GUIRobot.Source.Virtual_HID.VMouse._click" class="py-name" href="#" onclick="return doclink('link-16', '_click', 'link-12');">_click</a></tt><tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line">             </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line">    <tt class="py-comment">#Duplicate function, should be made into module method:</tt> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line">    <tt class="py-comment">#Source.Virtual_HID.getKeyState()      </tt> </tt>
+<a name="test_VMouse.getKeyState"></a><div id="test_VMouse.getKeyState-def"><a name="L91"></a><tt class="py-lineno"> 91</tt> <a class="py-toggle" href="#" id="test_VMouse.getKeyState-toggle" onclick="return toggle('test_VMouse.getKeyState');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="GUIRobot.Test.test_Virtual_HID.test_VMouse-class.html#getKeyState">getKeyState</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">vKeyCode</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="test_VMouse.getKeyState-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="test_VMouse.getKeyState-expanded"><a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line">        <tt class="py-name">state</tt> <tt class="py-op">=</tt> <tt class="py-name">bin</tt><tt class="py-op">(</tt><tt class="py-name">ctypes</tt><tt class="py-op">.</tt><tt class="py-name">windll</tt><tt class="py-op">.</tt><tt class="py-name">user32</tt><tt class="py-op">.</tt><tt class="py-name">GetKeyState</tt><tt class="py-op">(</tt><tt class="py-name">vKeyCode</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line">        <tt class="py-name">state</tt> <tt class="py-op">=</tt> <tt class="py-name">state</tt><tt class="py-op">.</tt><tt class="py-name">split</tt><tt class="py-op">(</tt><tt class="py-string">'b'</tt><tt class="py-op">)</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt> </tt>
+<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">state</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> <tt class="py-op">==</tt> <tt class="py-string">'1'</tt><tt class="py-op">:</tt> </tt>
+<a name="L95"></a><tt class="py-lineno"> 95</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt class="py-name">True</tt> </tt>
+<a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt class="py-name">False</tt> </tt>
+</div></div><a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line">      </tt>
+<a name="main"></a><div id="main-def"><a name="L99"></a><tt class="py-lineno"> 99</tt> <a class="py-toggle" href="#" id="main-toggle" onclick="return toggle('main');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="GUIRobot.Test.test_Virtual_HID-module.html#main">main</a><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="main-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="main-expanded"><a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line">    <tt class="py-docstring">"""Run tests."""</tt> </tt>
+<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line">    <tt class="py-name">suite</tt> <tt class="py-op">=</tt> <tt class="py-name">unittest</tt><tt class="py-op">.</tt><tt class="py-name">TestLoader</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt class="py-name">loadTestsFromTestCase</tt><tt class="py-op">(</tt><tt id="link-17" class="py-name" targets="Class GUIRobot.Test.test_Virtual_HID.test_VMouse=GUIRobot.Test.test_Virtual_HID.test_VMouse-class.html"><a title="GUIRobot.Test.test_Virtual_HID.test_VMouse" class="py-name" href="#" onclick="return doclink('link-17', 'test_VMouse', 'link-17');">test_VMouse</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line">    <tt class="py-name">unittest</tt><tt class="py-op">.</tt><tt class="py-name">TextTestRunner</tt><tt class="py-op">(</tt><tt class="py-name">verbosity</tt><tt class="py-op">=</tt><tt class="py-number">2</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt class="py-name">run</tt><tt class="py-op">(</tt><tt class="py-name">suite</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line">         </tt>
+<a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line"><tt class="py-keyword">if</tt> <tt class="py-name">__name__</tt> <tt class="py-op">==</tt> <tt class="py-string">'__main__'</tt><tt class="py-op">:</tt> </tt>
+<a name="L105"></a><tt class="py-lineno">105</tt>  <tt class="py-line">    <tt id="link-18" class="py-name" targets="Function GUIRobot.Test.test_Virtual_HID.main()=GUIRobot.Test.test_Virtual_HID-module.html#main"><a title="GUIRobot.Test.test_Virtual_HID.main" class="py-name" href="#" onclick="return doclink('link-18', 'main', 'link-18');">main</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L106"></a><tt class="py-lineno">106</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="GUIRobot-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://github.com/Ph4g3/GUIRobot">GUIRobot</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Feb 03 20:39:44 2011
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

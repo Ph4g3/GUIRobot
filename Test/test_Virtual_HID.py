@@ -86,7 +86,8 @@ class test_VMouse(unittest.TestCase):
             for value in releaseValues:
                 self.mouse._click(value)
             
-            
+    #Duplicate function, should be made into module method:
+    #Source.Virtual_HID.getKeyState()      
     def getKeyState(self, vKeyCode):
         state = bin(ctypes.windll.user32.GetKeyState(vKeyCode))
         state = state.split('b')[1]

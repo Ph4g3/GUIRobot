@@ -94,7 +94,34 @@ class VKeyboard():
 
         #Get our initial state so we can revert toggle keys when
         #we are done
+        #
+        #UPDATE: Doesn't seem like we need this - zeroing our keybdstate
+        #seems to have no effect on actual interaction with the OS. This
+        #is due to no Input having been sent to the OS for processing.
+        #I imagine this will cause complications later:
+        # - User has CAPS_LOCK toggled when vkeyboard is initialized.
+        #   i.e. THEY'RE SHOUTING
+        # - vkeyboard runs __init__
+        # - vKeyCode for CAPS_LOCK is set to Off by program but has no
+        #   effect on actual state of keyboard.
+        # - User is shown that CAPS_LOCK is Off but text input from the
+        #   vkeyboard will be in opposite case
+        #
+        #I think this might be solved by taking the states of certain keys:
+        # - CAPS_LOCK
+        # - PLAY_PAUSE
+        # - SCROLL_LOCK
+        # - Others? Do some research
+        #After we apply our initial zeroing, restore state of these keys
+        #so it keystates appear correctly for the user.
+        
         self.initState = self._getKeyboardState()
+        
+        #Zero all the keys of the keyboard
+        zeroState = KeyBdState()
+        for button in zeroState.array:
+            button = 0
+            
         self.extra = c_ulong(0)
         self.click = Input_I()
         self.typeSpeed = typeSpeed
@@ -229,16 +256,29 @@ class VKeyboard():
                            'MAIL': 0xB4,   
                         }
                            
-    def __str__(self):
+    def printStates(self):
         items = self.vKeyTable.iteritems()
         values = self.vKeyTable.itervalues()
         kState = self._getKeyboardState()
+        states = []
         
         i = 0
         for iterations in range(len(self.vKeyTable)):
-            print('['+str(hex(values.next()))+']'+
-                  ' '+str(items.next()[0])+' : '+ str(kState.array[i]))
-            i+=1              
+            hexValue = values.next()
+            #Hex value of vKeyCode, padded to be at least length 4
+            #with leading zeros
+            strValue = "0x%2.2X" % hexValue
+            
+            #Actual button name with leading '.'s
+            item = ': '+str(items.next()[0]).rjust(12, '.')
+            state = ': '+self._getKeyState(kState.array[i])
+            
+            #Concatenate all strings and store in list
+            states.append(strValue+item+state)
+            i+=1
+        states.sort()
+        for buttonState in states:
+            print buttonState
     
     def _type(self, key):
         """[Internal] Takes a virtual key code and sends it to
@@ -262,7 +302,21 @@ class VKeyboard():
         """[Internal] Set the state of our virtual keyboard from a
            256-byte C array."""
            
+        #http://msdn.microsoft.com/en-us/library/ms646301(v=vs.85).aspx
+           
         ctypes.windll.user32.SetKeyboardState(ctypes.pointer(kState))
+    
+    def _getKeyState(self, binKeyState):
+        """[Internal] Win OS returns a short for keys state. Flags must be evaluated
+           in order to determine what state the key is in."""
+           
+        state = ctypes.windll.user32.GetKeyState(binKeyState)
+        if state is 0:
+            return 'Off'
+        if state is 1:
+            return 'Toggled'
+        return 'Pressed'
+        
 
     def translateKey(self, key):
         """Translate a virtual key code into an actual 'keyboard

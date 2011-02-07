@@ -21,4 +21,5 @@ Thumbs.db
 ######################
 .project
 .pydevproject
+.log
 *.pyc

@@ -121,6 +121,7 @@ class VKeyboard():
         zeroState = KeyBdState()
         for button in zeroState.array:
             button = 0
+        self._setKeyboardState(zeroState)
             
         self.extra = c_ulong(0)
         self.click = Input_I()

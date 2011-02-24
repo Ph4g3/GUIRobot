@@ -1,6 +1,6 @@
 #=========================#
 #                         #
-#     Version: 0.4        #
+#     Version: 0.5        #
 #  Author:  Martin Moore  #
 #                         #
 #=========================#
@@ -177,7 +177,7 @@ class VKeyboard():
     """Our Virtual Keyboard! Takes type speed as its
        only (optional) argument. Default is 0.3 seconds."""
        
-    def __init__(self, typeSpeed = 0.3):
+    def __init__(self, typeSpeed = 0.05):
         """Init of our VKeyboard sets up an ulong for
            extra information provided by the operating system,
            an Input Interface object and the virtual key code
@@ -194,6 +194,18 @@ class VKeyboard():
         self.extra = c_ulong(0)
         self.click = Input_I()
         self.typeSpeed = typeSpeed
+        
+        self.specials = """-=+[];'#\,./"""
+        
+        #Modified 3 is a pound symbol, but seems to be misinterpreted by python.
+        #Damn them brits.
+        self.modSpecials = {
+        '!': 1,    '"': 2,   '$': 4,
+        '%': 5,    '^': 6,   '&': 7,   '*': 8,
+        '(': 9,    ')': 0,   '_': '-', '{': '[',
+        '}': '}',  ':': ';', '@': "'", '~': '#',
+        '|': '\\', '<': ',', '>': '.', '?': '/'
+        }
 
         self.vKeyTable = { 'VK_BACKSPACE': 0x08,
                            'VK_TAB': 0x09,
@@ -329,8 +341,8 @@ class VKeyboard():
                            'VK_APP2': 0xB7,
                            
                            #Misc key, varies by keyboard
-                           ':': 0xBA,
-                           'VK_COLON': 0xBA,
+                           ';': 0xBA,
+                           'VK_SEMI_COLON': 0xBA,
                            
                            '+': 0xBB,
                            'VK_OEM_PLUS': 0xBB,
@@ -397,17 +409,52 @@ class VKeyboard():
         for buttonState in states:
             print buttonState
     
-    def _type(self, key):
+    def _input(self, key, dwFlags=0,):
         """[Internal] Takes a virtual key code and sends it to
-           the operating system. """
-           
-        self.click.ki = KeyBdInput(key, 0, 0, 0, ctypes.pointer(self.extra))
+           the operating system. By default this pushes a button.
+           dwFlags=0x02 to release a button"""
+
+        self.click.ki = KeyBdInput(key, 0, dwFlags, 0, ctypes.pointer(self.extra))
         x = Input(1, self.click)
         ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
         time.sleep(self.typeSpeed)
         
-    def _parseString(self, string):
-        pass
+    def _parse(self, string):
+        
+        """Parses strings into representations of virtual codes, which are
+           eventually turned into actual hex key codes. Every "vKey" is in 
+           a list of it's own for characters that need modifiers. e.g.:
+               a = 'a' = _input(0x41)
+               A = 'VK_SHIFT' + 'a' = _input(0x10); _input(0x41)"""
+    
+        vKeys = []
+        words = string.split(' ')
+        #Add spaces taken out by str.split()
+        i = 1
+        for spaces in range(len(words)-1):
+            words.insert(i, ' ')
+            i+=2
+    
+        for word in words:
+            if word is ' ':
+                vKeys.append([word])
+            elif word.startswith('VK_'):
+                #Assume it's in vKeyTable, should try-except this
+                vKeys.append([word])
+            else:
+                for letter in word:
+                    if letter.isupper():
+                        vKeys.append(['VK_LSHIFT', letter.lower()])
+                    elif letter.isalpha():
+                        vKeys.append([letter])
+                    elif letter.isdigit():
+                        vKeys.append([int(letter)])
+                    elif letter in self.specials:
+                        vKeys.append([letter])
+                    elif letter in self.modSpecials:
+                        vKeys.append(['VK_LSHIFT', self.modSpecials[letter]])
+                        
+        return vKeys
         
     def _getKeyboardState(self):
         """[Internal] Returns the state of our virtual keyboard in
@@ -444,23 +491,30 @@ class VKeyboard():
         if self.vKeyTable.has_key(key):
             return self.vKeyTable.get(key)
         else:
-            raise ValueError
+            print key, " is not valid"
+#            raise ValueError('Error on key %s' %key)
 
-    def pressButton(self, button):
-        """Takes a physical key representation (e.g. 'ESCAPE', 'UP',
-           'DOWN', 'v', etc.) and translates it into a virtual key
-           code for use by the OS. """
-           
-        VHIDLog.debug('Pressed button: '+str(button))
-           
-        try:
-            self._type(self._translateKey(button))
-        except ValueError:
-            print("Cannot translate key: Value Error!")
-            VHIDLog.error('Invalid button: '+str(button))
+    def type(self, string):
+        """Takes a normal user string, such as this docstring, parses it, 
+           converts it and simulates user input via the keyboard. """
+        
+        VHIDLog.debug('Typing: '+string)
+        vKeys = self._parse(string)                
+        self._keyAction(*vKeys)
+        
+    def _keyAction(self, *args):
+        """[Internal] Simulates a key press and release."""
+        
+        for action in args:
+            for vKey in action:
+                keyCode = self._translateKey(vKey)
+                self._input(keyCode)
+                #Release the keys that were just pressed.
+            for vKey in action:
+                keyCode = self._translateKey(vKey)
+                self._input(keyCode, dwFlags=2)
             
-        self._setKeyboardState(self.initState)
-
+            
 class VMouse():
     """
     Create a virtual mouse.

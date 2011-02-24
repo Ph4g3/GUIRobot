@@ -1,23 +1,114 @@
 #=========================#
 #                         #
-#     Version: 0.3        #
+#     Version: 0.4        #
 #  Author:  Martin Moore  #
 #                         #
 #=========================#
 
 import time
-
+import logging
+import threading
 import ctypes
-from ctypes.wintypes import (c_long, c_short, c_byte, c_ulong, c_ushort, 
-                             POINT, POINTER, Structure, Union, sizeof)
-                   
 
-#Global c_ulong pointer object used with
-#dwExtraInfo in certain structs. Might be a
-#better idea to convert this into a class,
-#but it works well as it is.
-PUL = POINTER(c_ulong)
+from ctypes.wintypes import (c_int, c_long, c_short, c_byte, c_ulong, c_ushort, 
+                             POINT, POINTER, Structure, Union, sizeof, HHOOK,
+                             HINSTANCE)
 
+#Start logger.
+VHIDLog = logging.getLogger('GUIRobot.Source.VHID')
+VHIDLog.debug('Virtual_HID module initialized.')
+
+##############################################################################
+## TEST SECTION - TO BE REMOVED ##############################################
+##############################################################################
+#class KeyBdLogger(threading.Thread):
+#    """Key logger for keyboard events."""
+#    
+#    def __init__(self):
+#        threading.Thread.__init__(self)
+#        self.KeyBdHook = HHook()
+#        self.messages = []
+#        self.id = threading.current_thread().ident
+#        #print type(self.id), self.id
+#        
+#    def run(self):
+#        #Print 2 seconds of vkCodes
+#        start = time.time()
+#        while time.time() < (start + 2):
+#            self.KeyBdHook.hook = self.SetWindowsHookEx(13, self.KeyboardProc,
+#                                                        self.GetModuleHandle(0), 0)
+#            if self.KeyBdHook.hook == 0:
+#                print 'ERROR: '+str(ctypes.windll.kernel32.GetLastError())
+#        
+##            print type(self.KeyBdHook.hook)
+##            print self.KeyBdHook.hook
+#                #Unhook our shit regardless of outcome
+#            self.UnhookWindowsHookEx(self.KeyBdHook.hook)
+#            
+#        print self.messages
+#                
+#    def KeyboardProc(self, nCode, wParam, lParam):
+#        """LLKeyboard procedure callback function for our hook to the OS.
+#        
+#           nCode tells us if we should pass an event onto the actual recipient 
+#           of the message first. We'll ignore this for now as we want to record
+#           all keystrokes.
+#           
+#           wParam gives us info on whether the key was pressed or released.
+#           
+#           lParam is a pointer to our KBLLSTRUCT.
+#           
+#           http://msdn.microsoft.com/en-us/library/ms644985(v=vs.85).aspx"""
+#          
+#        #nCode tells us if we should pass an event onto the actual recipient of the
+#        #message first. I say screw that - I want all the keystrokes first.
+#        if nCode < c_int(0):
+##            Keyboard event is passed through lParam, so copy this into our Python
+##            KBDLLStruct type using a windows function 'MoveMemory'
+#
+#           
+#            #Because it's a windows function calling this method, we'll want to
+#            #pass back information that we've taken so it can be used by other applications.
+#            return ctypes.windll.user32.GetNextHookEx(self.KeyBdHook.hook,
+#                                                  nCode, wParam, lParam)
+#        else:
+#            ctypes.windll.kernel32.RtlMoveMemory(ctypes.addressof(self.KeyBdHook.kStruct),
+#                                                 ctypes.c_void_p(lParam),
+#                                                 ctypes.sizeof(lParam))
+#            
+#            self.message.append(self.KeyBdHook.kStruct)
+#        
+#    def SetWindowsHookEx(self, idHook, lpFn, hMod, dwThreadId):
+#        """Cast our python types into a Windows function type"""
+#        WinFunc = ctypes.WINFUNCTYPE(c_ulong, c_ulong, c_ulong, c_ulong, c_ulong)
+#        return ctypes.windll.user32.SetWindowsHookExA(idHook, WinFunc(lpFn), hMod, dwThreadId)
+#    
+#    def GetModuleHandle(self, lpModuleName):
+#        return ctypes.windll.kernel32.GetModuleHandleA(lpModuleName)
+#    
+#    def UnhookWindowsHookEx(self, hHook):
+#        return ctypes.windll.user32.UnhookWindowsHookEx(hHook)
+#    
+#class HHook():
+#    """A handle for the hook we use to get keyboard keystrokes."""
+#    
+#    def __init__(self):
+#        self.hook = HHOOK
+#        self.kStruct = KBLLHOOKSTRUCT()
+#
+#class KBLLHOOKSTRUCT(Structure):
+#    """Holds information about keyboard events we receive from a hook procedure.
+#       Keyboard Low Level Hook Structure.
+#       http://msdn.microsoft.com/en-us/library/ms644967(v=vs.85).aspx"""
+#    
+#    #Kind of annoying how similar this is to the KeyBdInput Struct.
+#    _fields_ = [("vkCode", c_ulong),
+#                ("scanCode", c_ulong),
+#                ("flags", c_ulong),
+#                ("time", c_ulong),
+#                ("dwExtraInfo", POINTER(c_ulong))]
+##############################################################################
+            
 class KeyBdInput(Structure):
     """Creates a keyboard input_I structure. wVk is the virtual
        keycode which correspond to physical keys. wScan, dwFlags
@@ -31,7 +122,7 @@ class KeyBdInput(Structure):
              ("wScan", c_ushort),
              ("dwFlags", c_ulong),
              ("time", c_ulong),
-             ("dwExtraInfo", PUL)]
+             ("dwExtraInfo", POINTER(c_ulong))]
 
 class HardwareInput(Structure):
     """HardwareInput is unused in this module, but is
@@ -56,7 +147,7 @@ class MouseInput(Structure):
              ("dwData", c_ulong),
              ("dwFlags", c_ulong),
              ("time",c_ulong),
-             ("dwExtraInfo", PUL)]
+             ("dwExtraInfo", POINTER(c_ulong))]
 
 class Input_I(Union):
     """Input interface, takes one the following
@@ -81,7 +172,7 @@ class KeyBdState(Structure):
        many keys will be in the '0' state. """
        
     _fields_ = [("array", c_byte * 256)]
-
+     
 class VKeyboard():
     """Our Virtual Keyboard! Takes type speed as its
        only (optional) argument. Default is 0.3 seconds."""
@@ -91,29 +182,6 @@ class VKeyboard():
            extra information provided by the operating system,
            an Input Interface object and the virtual key code
            table."""
-
-        #Get our initial state so we can revert toggle keys when
-        #we are done
-        #
-        #UPDATE: Doesn't seem like we need this - zeroing our keybdstate
-        #seems to have no effect on actual interaction with the OS. This
-        #is due to no Input having been sent to the OS for processing.
-        #I imagine this will cause complications later:
-        # - User has CAPS_LOCK toggled when vkeyboard is initialized.
-        #   i.e. THEY'RE SHOUTING
-        # - vkeyboard runs __init__
-        # - vKeyCode for CAPS_LOCK is set to Off by program but has no
-        #   effect on actual state of keyboard.
-        # - User is shown that CAPS_LOCK is Off but text input from the
-        #   vkeyboard will be in opposite case
-        #
-        #I think this might be solved by taking the states of certain keys:
-        # - CAPS_LOCK
-        # - PLAY_PAUSE
-        # - SCROLL_LOCK
-        # - Others? Do some research
-        #After we apply our initial zeroing, restore state of these keys
-        #so it keystates appear correctly for the user.
         
         self.initState = self._getKeyboardState()
         
@@ -127,29 +195,29 @@ class VKeyboard():
         self.click = Input_I()
         self.typeSpeed = typeSpeed
 
-        self.vKeyTable = { 'BACKSPACE': 0x08,
-                           'TAB': 0x09,
-                           'ENTER': 0x0D,
-                           'SHIFT': 0x10,
-                           'CTRL': 0x11,
-                           'ALT': 0x12,
-                           'PAUSE': 0x13,
-                           'CAPSLOCK': 0x14,
-                           'ESCAPE': 0x1B,
+        self.vKeyTable = { 'VK_BACKSPACE': 0x08,
+                           'VK_TAB': 0x09,
+                           'VK_ENTER': 0x0D,
+                           'VK_SHIFT': 0x10,
+                           'VK_CTRL': 0x11,
+                           'VK_ALT': 0x12,
+                           'VK_PAUSE': 0x13,
+                           'VK_CAPSLOCK': 0x14,
+                           'VK_ESCAPE': 0x1B,
                            ' ': 0x20,
-                           'SPACEBAR': 0x20,
-                           'PAGEUP': 0x21,
-                           'PAGEDOWN': 0x22,
-                           'END': 0x23,
-                           'HOME': 0x24,
-                           'LEFT': 0x25,
-                           'UP': 0x26,
-                           'RIGHT': 0x27,
-                           'DOWN': 0x28,
-                           'PRINTSCR': 0x2C,
-                           'INSERT': 0x2D,
-                           'DELETE': 0x2E,
-                           'HELP': 0x2F,
+                           'VK_SPACEBAR': 0x20,
+                           'VK_PAGEUP': 0x21,
+                           'VK_PAGEDOWN': 0x22,
+                           'VK_END': 0x23,
+                           'VK_HOME': 0x24,
+                           'VK_LEFT': 0x25,
+                           'VK_UP': 0x26,
+                           'VK_RIGHT': 0x27,
+                           'VK_DOWN': 0x28,
+                           'VK_PRINTSCR': 0x2C,
+                           'VK_INSERT': 0x2D,
+                           'VK_DELETE': 0x2E,
+                           'VK_HELP': 0x2F,
                            0: 0x30,
                            1: 0x31,
                            2: 0x32,
@@ -160,102 +228,150 @@ class VKeyboard():
                            7: 0x37,
                            8: 0x38,
                            9: 0x39,
-                           'A': 0x41,
-                           'B': 0x42,
-                           'C': 0x43,
-                           'D': 0x44,
-                           'E': 0x45,
-                           'F': 0x46,
-                           'G': 0x47,
-                           'H': 0x48,
-                           'I': 0x49,
-                           'J': 0x4a,
-                           'K': 0x4b,
-                           'L': 0x4c,
-                           'M': 0x4d,
-                           'N': 0x4e,
-                           'O': 0x4f,
-                           'P': 0x50,
-                           'Q': 0x51,
-                           'R': 0x52,
-                           'S': 0x53,
-                           'T': 0x54,
-                           'U': 0x55,
-                           'V': 0x56,
-                           'W': 0x57,
-                           'X': 0x58,
-                           'Y': 0x59,
-                           'Z': 0x5a,
-                           'LWINKEY': 0x5B,
-                           'RWINKEY': 0x5C,
-                           'APPKEY': 0x5D,
-                           'SLEEP': 0x5F,
-                           'NUM0': 0x60,
-                           'NUM1': 0x61,
-                           'NUM2': 0x62,
-                           'NUM3': 0x63,
-                           'NUM4': 0x64,
-                           'NUM5': 0x65,
-                           'NUM6': 0x66,
-                           'NUM7': 0x67,
-                           'NUM8': 0x68,
-                           'NUM9': 0x69,
-                           'MULTIPLY': 0x6A,
-                           'ADD': 0x6B,
-                           'SEP': 0x6C,
-                           'SUB': 0x6D,
-                           'DECIMAL': 0x6E,
-                           'DIVIDE': 0x6E,
-                           'F1': 0x70,
-                           'F2': 0x71,
-                           'F3': 0x72,
-                           'F4': 0x73,
-                           'F5': 0x74,
-                           'F6': 0x75,
-                           'F7': 0x76,
-                           'F8': 0x77,
-                           'F9': 0x78,
-                           'F10': 0x79,
-                           'F11': 0x7a,
-                           'F12': 0x7b,
-                           'F13': 0x7c,
-                           'F14': 0x7d,
-                           'F15': 0x7e,
-                           'F16': 0x7f,
-                           'F17': 0x80,
-                           'F18': 0x81,
-                           'F19': 0x82,
-                           'F20': 0x83,
-                           'F21': 0x84,
-                           'F22': 0x85,
-                           'F23': 0x86,
-                           'F24': 0x87,
-                           'NUMLOCK': 0x90,
-                           'SCROLL': 0x91,
-                           'LSHIFT': 0xA0,
-                           'RSHIFT': 0xA1,
-                           'LCTRL': 0xA2,
-                           'RCTRL': 0xA3,
-                           'LMENU': 0xA4,
-                           'RMENU': 0xA5,
+                           'a': 0x41,
+                           'b': 0x42,
+                           'c': 0x43,
+                           'd': 0x44,
+                           'e': 0x45,
+                           'f': 0x46,
+                           'g': 0x47,
+                           'h': 0x48,
+                           'i': 0x49,
+                           'j': 0x4a,
+                           'k': 0x4b,
+                           'l': 0x4c,
+                           'm': 0x4d,
+                           'n': 0x4e,
+                           'o': 0x4f,
+                           'p': 0x50,
+                           'q': 0x51,
+                           'r': 0x52,
+                           's': 0x53,
+                           't': 0x54,
+                           'u': 0x55,
+                           'v': 0x56,
+                           'w': 0x57,
+                           'x': 0x58,
+                           'y': 0x59,
+                           'z': 0x5a,
+                           'VK_LWINKEY': 0x5B,
+                           'VK_RWINKEY': 0x5C,
+                           'VK_APPKEY': 0x5D,
+                           'VK_SLEEP': 0x5F,
+                           'VK_NUM0': 0x60,
+                           'VK_NUM1': 0x61,
+                           'VK_NUM2': 0x62,
+                           'VK_NUM3': 0x63,
+                           'VK_NUM4': 0x64,
+                           'VK_NUM5': 0x65,
+                           'VK_NUM6': 0x66,
+                           'VK_NUM7': 0x67,
+                           'VK_NUM8': 0x68,
+                           'VK_NUM9': 0x69,
+                           'VK_MULTIPLY': 0x6A,
+                           'VK_ADD': 0x6B,
+                           #What the hell is the Separator key?
+                           'VK_SEP': 0x6C,
+                           'VK_SUB': 0x6D,
+                           'VK_DECIMAL': 0x6E,
+                           'VK_DIVIDE': 0x6E,
+                           'VK_F1': 0x70,
+                           'VK_F2': 0x71,
+                           'VK_F3': 0x72,
+                           'VK_F4': 0x73,
+                           'VK_F5': 0x74,
+                           'VK_F6': 0x75,
+                           'VK_F7': 0x76,
+                           'VK_F8': 0x77,
+                           'VK_F9': 0x78,
+                           'VK_F10': 0x79,
+                           'VK_F11': 0x7a,
+                           'VK_F12': 0x7b,
+                           'VK_F13': 0x7c,
+                           'VK_F14': 0x7d,
+                           'VK_F15': 0x7e,
+                           'VK_F16': 0x7f,
+                           'VK_F17': 0x80,
+                           'VK_F18': 0x81,
+                           'VK_F19': 0x82,
+                           'VK_F20': 0x83,
+                           'VK_F21': 0x84,
+                           'VK_F22': 0x85,
+                           'VK_F23': 0x86,
+                           'VK_F24': 0x87,
+                           'VK_NUMLOCK': 0x90,
+                           'VK_SCROLL': 0x91,
+                           'VK_LSHIFT': 0xA0,
+                           'VK_RSHIFT': 0xA1,
+                           'VK_LCTRL': 0xA2,
+                           'VK_RCTRL': 0xA3,
+                           'VK_LMENU': 0xA4,
+                           'VK_RMENU': 0xA5,
 
                            #Browser Buttons
-                           'B_Back': 0xA6,
-                           'B_Forward': 0xA7,
-                           'B_Refresh': 0xA8,
-                           'B_Stop': 0xA9,
-                           'B_Search': 0xAA,
-                           'B_Favorites': 0xAB,
+                           'VK_B_Back': 0xA6,
+                           'VK_B_Forward': 0xA7,
+                           'VK_B_Refresh': 0xA8,
+                           'VK_B_Stop': 0xA9,
+                           'VK_B_Search': 0xAA,
+                           'VK_B_Favorites': 0xAB,
 
-                           'VOL_MUTE': 0xAD,
-                           'VOL_DOWN': 0xAE,
-                           'VOL_UP': 0xAF,
-                           'NEXT_TRACK': 0xB0,
-                           'PREV_TRACK': 0xB1,
-                           'STOP_TRACK': 0xB2,
-                           'PLAY_PAUSE': 0xB3,
-                           'MAIL': 0xB4,   
+                           'VK_VOL_MUTE': 0xAD,
+                           'VK_VOL_DOWN': 0xAE,
+                           'VK_VOL_UP': 0xAF,
+                           'VK_NEXT_TRACK': 0xB0,
+                           'VK_PREV_TRACK': 0xB1,
+                           'VK_STOP_TRACK': 0xB2,
+                           'VK_PLAY_PAUSE': 0xB3,
+                           'VK_MAIL': 0xB4,
+                           'VK_MEDIA': 0xB5,
+                           'VK_APP1': 0xB6,
+                           'VK_APP2': 0xB7,
+                           
+                           #Misc key, varies by keyboard
+                           ':': 0xBA,
+                           'VK_COLON': 0xBA,
+                           
+                           '+': 0xBB,
+                           'VK_OEM_PLUS': 0xBB,
+                           
+                           ',': 0xBC,
+                           'VK_OEM_COMMA': 0xBC,
+                           
+                           '-': 0xBD,
+                           'VK_OEM_MINUS': 0xBD,
+                           
+                           '.': 0xBE,
+                           'VK_OEM_PERIOD': 0xBE,
+                           
+                           #Misc key, varies by keyboard
+                           '/': 0xBF,
+                           'VK_SLASH': 0xBF,
+                           
+                           #Misc key, varies by keyboard
+                           "'": 0xC0,
+                           'VK_APOSTROPHE': 0xC0,
+                           
+                           #Misc key, varies by keyboard
+                           '[': 0xDB,
+                           'VK_OPEN_SQUARE_BRACKET': 0xDB,
+                           
+                           #Misc key, varies by keyboard
+                           '\\': 0xDC,
+                           'VK_BACKSLASH': 0xDC,
+                           
+                           #Misc key, varies by keyboard
+                           ']': 0xDD,
+                           'VK_CLOSE_SQUARE_BRACKET': 0xDD,
+                           
+                           #Misc key, varies by keyboard
+                           '#': 0xDE,
+                           'VK_HASH': 0xDE,
                         }
+        #Might be helpful
+        #http://www.kbdedit.com/manual/low_level_vk_list.html
+        
+        VHIDLog.debug('Virtual keyboard instantiated.')
                            
     def printStates(self):
         items = self.vKeyTable.iteritems()
@@ -271,7 +387,7 @@ class VKeyboard():
             strValue = "0x%2.2X" % hexValue
             
             #Actual button name with leading '.'s
-            item = ': '+str(items.next()[0]).rjust(12, '.')
+            item = ': '+str(items.next()[0]).rjust(14, '.')
             state = ': '+self._getKeyState(kState.array[i])
             
             #Concatenate all strings and store in list
@@ -289,7 +405,9 @@ class VKeyboard():
         x = Input(1, self.click)
         ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
         time.sleep(self.typeSpeed)
-        self._setKeyboardState(self.initState)
+        
+    def _parseString(self, string):
+        pass
         
     def _getKeyboardState(self):
         """[Internal] Returns the state of our virtual keyboard in
@@ -319,8 +437,8 @@ class VKeyboard():
         return 'Pressed'
         
 
-    def translateKey(self, key):
-        """Translate a virtual key code into an actual 'keyboard
+    def _translateKey(self, key):
+        """[Internal]Translate a virtual key code into an actual 'keyboard
            key'."""
            
         if self.vKeyTable.has_key(key):
@@ -333,10 +451,15 @@ class VKeyboard():
            'DOWN', 'v', etc.) and translates it into a virtual key
            code for use by the OS. """
            
+        VHIDLog.debug('Pressed button: '+str(button))
+           
         try:
-            self._type(self.translateKey(button))
+            self._type(self._translateKey(button))
         except ValueError:
             print("Cannot translate key: Value Error!")
+            VHIDLog.error('Invalid button: '+str(button))
+            
+        self._setKeyboardState(self.initState)
 
 class VMouse():
     """
@@ -371,7 +494,9 @@ class VMouse():
                             'release_middle': [0x40]
                           }
         
-    def getCoord(self):
+        VHIDLog.debug('Virtual mouse instantiated.')
+        
+    def getCoords(self):
         """Gets the current mouse coordinates from the OS.
            Returns a POINT object."""
            
@@ -379,11 +504,22 @@ class VMouse():
         ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
         return pt
 
-    def setCoord(self, xCoord, yCoord):
+    def setCoords(self, xCoord, yCoord):
         """Pass coordinates to the OS to set the mouse at
            the desired coordinates."""
            
         ctypes.windll.user32.SetCursorPos(xCoord, yCoord)
+        
+        VHIDLog.debug('Mouse coordinates set at '+str(xCoord)+', '+str(yCoord))
+        
+    def setPointCoords(self, point):
+        """Pass coordinates to the OS to set the mouse at
+           the desired point."""
+           
+        if type(point) is POINT:
+            self.setCoords(point.x, point.y)
+        else:
+            raise TypeError
 
     def _click(self, clickType, dwData = 0):
         """[Internal] Send a virtual key code representing a click
@@ -400,6 +536,8 @@ class VMouse():
                                            ctypes.sizeof(x))
             time.sleep(self.clickSpeed)
             
+        VHIDLog.debug(clickType+" mouse button clicked.")
+            
     def _translateClick(self, buttonToClick):
         """[Internal] Translate our click type to virtual key codes 
            representing a click and release tuple."""
@@ -410,30 +548,48 @@ class VMouse():
             raise ValueError
 
     def leftClick(self):
+        """Performs a left click and releases it."""
+        
         self._click('left')
 
     def rightClick(self):
+        """Performs a right click and releases it."""
+        
         self._click('right')
 
     def middleClick(self):
+        """Performs a middle click and releases it."""
+        
         self._click('middle')
         
     def holdLeft(self):
+        """Holds down left mouse button until released with with releaseLeft()."""
+
         self._click('hold_left')
         
     def holdRight(self):
+        """Holds down right mouse button until released with with releaseRight()."""
+
         self._click('hold_right')
         
     def holdMiddle(self):
+        """Holds down middle mouse button until released with with releaseMiddle()."""
+
         self._click('hold_middle')
         
     def releaseLeft(self):
+        """Releases left click. """
+               
         self._click('release_left')
         
     def releaseRight(self):
+        """Releases right click. """
+        
         self._click('release_right')
         
     def releaseMiddle(self):
+        """Releases middle click."""
+        
         self._click('release_middle')
 
     def _mouseWheel(self, amt):
@@ -446,6 +602,8 @@ class VMouse():
         self._click('wheel', amt*self.wheelDelta)
 
     def mouseWheelUp(self, amount):
+        """Moves mouse wheel one 'click' away from the user."""
+        
         self._mouseWheel(amount)
         
     def mouseWheelDown(self, amount):

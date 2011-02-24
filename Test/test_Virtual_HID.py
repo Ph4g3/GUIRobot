@@ -1,6 +1,6 @@
 #=========================#
 #                         #
-#     Version: 0.3        #
+#     Version: 0.4        #
 #  Author:  Martin Moore  #
 #                         #
 #=========================#
@@ -9,35 +9,40 @@
 import ctypes
 import ctypes.wintypes
 import unittest
-import os
-import sys
 import time
+import logging
 
 #Local modules
 import Source.Virtual_HID as Virtual_HID        
-        
+
+testLog = logging.getLogger('GUIRobot.Test.test_Virtual_HID')
+
 class test_VMouse(unittest.TestCase):
     
     def setUp(self):
         """Create a fast virtual mouse"""
         
-        self.mouse = Virtual_HID.VMouse(clickSpeed = 0)
+        testLog.debug('====Mouse testing started====')
+        
+        self.mouse = Virtual_HID.VMouse(clickSpeed = 0.2)
         self.pt = ctypes.wintypes.POINT()
         
     def tearDown(self):
         """Force python to clean up."""
+        
+        testLog.debug('====Mouse testing finished====')
         
         del self.mouse
         del self.pt
         
     def test_getCoord(self):
         ctypes.windll.user32.SetCursorPos(100, 100)
-        self.pt = self.mouse.getCoord()
+        self.pt = self.mouse.getCoords()
         self.assertEquals(100, self.pt.x)
         self.assertEquals(100, self.pt.y)
         
-    def test_setCoord(self):
-        self.mouse.setCoord(100, 100)
+    def test_setCoords(self):
+        self.mouse.setCoords(100, 100)
         ctypes.windll.user32.GetCursorPos(ctypes.byref(self.pt))
         self.assertEquals(100, self.pt.x)
         self.assertEquals(100, self.pt.y)
@@ -50,37 +55,43 @@ class test_VMouse(unittest.TestCase):
         #Most likely to keep 1px of mouse cursor on screen
         resolution = ctypes.windll.user32.GetSystemMetrics(0), \
                      ctypes.windll.user32.GetSystemMetrics(1)
-        self.mouse.setCoord(1000000, 1000000)
+        self.mouse.setCoords(1000000, 1000000)
         ctypes.windll.user32.GetCursorPos(ctypes.byref(self.pt))
         self.assertEquals(resolution[0] - 1, self.pt.x)
         self.assertEquals(resolution[1] - 1, self.pt.y)
         
         #Illegal coordinates should default to 0, 0
-        self.mouse.setCoord(-10, -10)
+        self.mouse.setCoords(-10, -10)
         ctypes.windll.user32.GetCursorPos(ctypes.byref(self.pt))
         self.assertEquals(0, self.pt.x)
         self.assertEquals(0, self.pt.y)        
         
     def test_click(self):
-        self.mouse.setCoord(500, 500)
-        time.sleep(0.5)
         
         #Virtual key codes to check state of
         #a given key. Note: Different codes used for
         #clicking/releasing keys. Damn MS.
-        vKeyCodes = [0x01, 0x02, 0x08]
+        xCoord, yCoord = 500, 500
+        vKeyCodes = [0x01, 0x02, 0x04]
         clickValues = ['hold_left', 'hold_right', 'hold_middle']
         releaseValues = ['release_left', 'release_right', 'release_middle']
+        
+        #Get current state of mouse - buttons are stored in toggled
+        #states regardless of whether they are off or on.
+        states = []
+        for x in vKeyCodes:
+            states.append(ctypes.windll.user32.GetKeyState(x))
         
         try:
             i = 0
             for value in clickValues:
+                self.mouse.setCoords(xCoord, yCoord)
                 self.mouse._click(value)
-                self.assertTrue(self.getKeyState(vKeyCodes[i]))
+                self.assertTrue(self.getKeyState(vKeyCodes[i], states[i]), msg=clickValues[i]+
+                                ' '+releaseValues[i])
                 self.mouse._click(releaseValues[i])
                 i += 1
-        except AssertionError:
-            print(sys.exc_info()[1])
+                
         finally:
             #Release everything regardless of test results
             for value in releaseValues:
@@ -88,10 +99,11 @@ class test_VMouse(unittest.TestCase):
             
     #Duplicate function, should be made into module method:
     #Source.Virtual_HID.getKeyState()      
-    def getKeyState(self, vKeyCode):
+    def getKeyState(self, vKeyCode, oldState):
         state = bin(ctypes.windll.user32.GetKeyState(vKeyCode))
+        testLog.debug(str(vKeyCode)+' returned '+state)
         state = state.split('b')[1]
-        if state[0] == '1':
+        if state[0] != oldState:
             return True
         else:
             return False

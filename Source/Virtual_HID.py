@@ -97,8 +97,8 @@ VHIDLog.debug('Virtual_HID module initialized.')
 #        self.kStruct = KBLLHOOKSTRUCT()
 #
 #class KBLLHOOKSTRUCT(Structure):
-#    """Holds information about keyboard events we receive from a hook procedure.
-#       Keyboard Low Level Hook Structure.
+#    """Holds information about keyboard events we receive from a hook 
+#       procedure. Keyboard Low Level Hook Structure.
 #       http://msdn.microsoft.com/en-us/library/ms644967(v=vs.85).aspx"""
 #    
 #    #Kind of annoying how similar this is to the KeyBdInput Struct.
@@ -414,7 +414,8 @@ class VKeyboard():
            the operating system. By default this pushes a button.
            dwFlags=0x02 to release a button"""
 
-        self.click.ki = KeyBdInput(key, 0, dwFlags, 0, ctypes.pointer(self.extra))
+        self.click.ki = KeyBdInput(key, 0, dwFlags, 0, 
+                                   ctypes.pointer(self.extra))
         x = Input(1, self.click)
         ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
         time.sleep(self.typeSpeed)
@@ -438,9 +439,24 @@ class VKeyboard():
         for word in words:
             if word is ' ':
                 vKeys.append([word])
+            #To press more than one key at a time, use '+'
+            elif '+' in word:
+                s = word.split('+')
+                word = ''
+                for part in s:
+                    word += part+' '
+                s = self._parse(word)
+                for space in range(s.count([' '])):
+                    s.remove([' ']);
+                l = []
+                for part in s:
+                    l.append(part[0])
+                vKeys.append(l)
             elif word.startswith('VK_'):
-                #Assume it's in vKeyTable, should try-except this
-                vKeys.append([word])
+                #Only append whole VK_* word if it actually means something
+                #Otherwise it's just a normal word.
+                if self.vKeyTable.has_key(word):
+                    vKeys.append([word])
             else:
                 for letter in word:
                     if letter.isupper():
@@ -453,7 +469,7 @@ class VKeyboard():
                         vKeys.append([letter])
                     elif letter in self.modSpecials:
                         vKeys.append(['VK_LSHIFT', self.modSpecials[letter]])
-                        
+        
         return vKeys
         
     def _getKeyboardState(self):
@@ -473,8 +489,8 @@ class VKeyboard():
         ctypes.windll.user32.SetKeyboardState(ctypes.pointer(kState))
     
     def _getKeyState(self, binKeyState):
-        """[Internal] Win OS returns a short for keys state. Flags must be evaluated
-           in order to determine what state the key is in."""
+        """[Internal] Win OS returns a short for keys state. Flags must be 
+           evaluated in order to determine what state the key is in."""
            
         state = ctypes.windll.user32.GetKeyState(binKeyState)
         if state is 0:
@@ -499,7 +515,8 @@ class VKeyboard():
            converts it and simulates user input via the keyboard. """
         
         VHIDLog.debug('Typing: '+string)
-        vKeys = self._parse(string)                
+        vKeys = self._parse(string)
+        VHIDLog.debug('Convert to: '+str(vKeys))       
         self._keyAction(*vKeys)
         
     def _keyAction(self, *args):
@@ -509,7 +526,7 @@ class VKeyboard():
             for vKey in action:
                 keyCode = self._translateKey(vKey)
                 self._input(keyCode)
-                #Release the keys that were just pressed.
+            #Release the keys that were just pressed.
             for vKey in action:
                 keyCode = self._translateKey(vKey)
                 self._input(keyCode, dwFlags=2)
@@ -617,17 +634,20 @@ class VMouse():
         self._click('middle')
         
     def holdLeft(self):
-        """Holds down left mouse button until released with with releaseLeft()."""
+        """Holds down left mouse button until released with with 
+           releaseLeft()."""
 
         self._click('hold_left')
         
     def holdRight(self):
-        """Holds down right mouse button until released with with releaseRight()."""
+        """Holds down right mouse button until released with with 
+           releaseRight()."""
 
         self._click('hold_right')
         
     def holdMiddle(self):
-        """Holds down middle mouse button until released with with releaseMiddle()."""
+        """Holds down middle mouse button until released with with 
+           releaseMiddle()."""
 
         self._click('hold_middle')
         

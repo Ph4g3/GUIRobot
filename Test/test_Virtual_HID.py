@@ -12,10 +12,73 @@ import unittest
 import time
 import logging
 
+from subprocess import Popen
+
 #Local modules
-import Source.Virtual_HID as Virtual_HID        
+import GUIRobot.Source.Virtual_HID as Virtual_HID        
 
 testLog = logging.getLogger('GUIRobot.Test.test_Virtual_HID')
+
+class test_VKeyboard(unittest.TestCase):
+    
+    def setUp(self):
+        """Create a fast virtual keyboard with a text editor to
+           recieve input"""
+           
+        testLog.debug('====Keyboard testing started====')
+        
+        self.strings = ['this is a lower case string',
+                        'This is a Mixed Case String',
+                        """/,.\#';[]-""",
+                        #Cannot support pound symbol atm.
+                        """!"%^&*()_+"""]
+        
+        #Create a file for writing to
+        self.testFile = 'C:/vKeybd.txt'
+        file = open(self.testFile)
+        file.close()
+        
+        self.commandString = """VK_CAPSLOCK this string should be in caps VK_CAPSLOCK"""
+        self.commandResult = """THIS STRING SHOULD BE IN CAPS"""
+        self.resolution = ctypes.windll.user32.GetSystemMetrics(0), \
+                          ctypes.windll.user32.GetSystemMetrics(1)
+        self.notepad = self.openEditor()
+        self.showWindow()
+        self.keyboard = Virtual_HID.VKeyboard()
+        
+        self.writeStrings()
+
+    def tearDown(self):
+        self.closeEditor(self.notepad)
+        del self.keyboard
+        
+    def writeStrings(self):
+        for string in self.strings:
+            self.keyboard.type(string)
+        self.keyboard.type(self.commandString)
+    
+    def openEditor(self):
+        app = Popen('notepad.exe', self.testFile)
+        return app
+        
+    def closeEditor(self, app):
+        try:
+            app.kill()
+        except:
+            print("Can't close the application.")
+        
+    def showWindow(self, windowTitle='Untitled - Notepad'):
+        """Attempts to find a window name "windowTitle" and show it
+           maximized"""
+           
+        h = ctypes.wintypes.HWND
+        ctypes.windll.user32.FindWindowA.restype = ctypes.wintypes.POINTER(h)
+        h = ctypes.windll.user32.FindWindowA(None, 'Untitled - Notepad')
+        return ctypes.windll.user32.ShowWindow(h, 3)
+            
+#    def test_stringsFromFile(self):
+#        pass
+        
 
 class test_VMouse(unittest.TestCase):
     
@@ -110,8 +173,11 @@ class test_VMouse(unittest.TestCase):
      
 def main():
     """Run tests."""
-    suite = unittest.TestLoader().loadTestsFromTestCase(test_VMouse)
+    suite =  unittest.TestSuite()
+    suite.addTest(unittest.TestLoader().loadTestsFromTestCase(test_VKeyboard))
+    suite.addTest(unittest.TestLoader().loadTestsFromTestCase(test_VMouse))
+    
     unittest.TextTestRunner(verbosity=2).run(suite)
-        
+            
 if __name__ == '__main__':
     main()    
